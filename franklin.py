@@ -192,8 +192,8 @@ def main():
     parser.add_argument('-i',
                         '--inputs',
                         nargs='+',
-                        default=True,
-                        help='disable info output (only show warnings and errors)')
+                        required=True,
+                        help='input file(s), space spearated')
 
     args = parser.parse_args()
 
