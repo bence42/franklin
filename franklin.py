@@ -6,7 +6,7 @@ from openpyxl import load_workbook
 from openpyxl.formatting.rule import Rule
 from openpyxl.styles.differential import DifferentialStyle
 from openpyxl.worksheet.worksheet import Worksheet
-from openpyxl.styles import PatternFill, Font
+from openpyxl.styles import PatternFill
 from openpyxl.utils import get_column_letter
 from openpyxl.workbook import Workbook
 
@@ -22,15 +22,15 @@ class Sheet():
         return self
 
     def sort(self, *args, **kwargs):
+        """ Wrapper around pd.DataFrame's sort_values. """
         self.data.sort_values(*args, **kwargs,  inplace=True)
-
-# Autofit column widths
 
 
 def autofit_columns(ws: Worksheet):
+    """ Sets each columns width so that the longest text still fits. """
     for col in ws.columns:
         max_length = 0
-        column = col[0].column_letter  # Get the column name (A, B, ...)
+        column = col[0].column_letter
         for cell in col:
             try:
                 if cell.value:
@@ -46,6 +46,7 @@ def autofit_columns(ws: Worksheet):
 
 
 def order_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """ Reorder columns in the specified order."""
     new_order = [
         'Chromosome',
         'Position',
@@ -80,18 +81,20 @@ def order_columns(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def insert_franklin_column(df: pd.DataFrame):
+    """" Inserts a new column named Frankin right to Clinvar_ID column. """
     col_idx = df.columns.get_loc('Clinvar_ID') + 1
     df.insert(col_idx, 'Franklin', value=None)
 
 
 def highlight_Clinvar_Significance(wb: Workbook, sheet_name: str, clinvar_idx: int, franklin_idx: int):
-    """ Highligh cells containing Clinvar_Significance 'benign'. """
+    """ Colors cells based on Clinvar_Significance on a single sheet. """
 
     text_to_highlight = 'benign'
     max_row_in_sheet = wb[sheet_name].max_row
     clinvar_col = get_column_letter(col_idx=clinvar_idx)
 
     def highlight_benign():
+        """ Colors Clinvar_Significance green when containing text 'benign'. """
         green_fill = DifferentialStyle(fill=PatternFill(bgColor="92d050"))
         benign_rule = Rule(type="containsText",
                         operator="containsText",
@@ -105,6 +108,7 @@ def highlight_Clinvar_Significance(wb: Workbook, sheet_name: str, clinvar_idx: i
             range_string=clinvar_col_range, cfRule=benign_rule)
 
     def highlight_not_benign():
+        """ Colors 'Franklin' cells yellow when the matching Clinvar_Significance does not contain 'benign'. """
         yellow_fill = DifferentialStyle(fill=PatternFill(bgColor="ffff00"))
         not_benign_rule = Rule(type="expression",
                             formula=[
@@ -122,8 +126,8 @@ def highlight_Clinvar_Significance(wb: Workbook, sheet_name: str, clinvar_idx: i
     highlight_not_benign()
 
 
-def process_file(input: str):
-    variants = Sheet('variants', pd.read_csv(input, sep="\t"))
+def process_file(input_file: str):
+    variants = Sheet('variants', pd.read_csv(input_file, sep="\t"))
     variants.sort('Variant_Frequency', ascending=False)
 
     variants.data = order_columns(variants.data)
@@ -133,14 +137,17 @@ def process_file(input: str):
     extended.filter(lambda df: df['Variant_Frequency'] > 0.35)
     extended.sort('Clinvar_Significance')
 
-    interesting_genes = ['BRCA1', 'BRCA2', 'PALB2', 'ATM', 'MLH1', 'MSH2', 'MSH6', 'PMS2', 'EPCAM', 'stk11']
-
     clinical = Sheet('klinikai', variants.data.copy())
     clinical.sort(['Gene_ID', 'Variant_Frequency', 'Clinvar_Significance'])
+    interesting_genes = ['BRCA1', 'BRCA2', 'PALB2', 'ATM', 'MLH1', 'MSH2', 'MSH6', 'PMS2', 'EPCAM', 'stk11']
     clinical.filter(lambda df: df['Gene_ID'].isin(interesting_genes))
 
-    excel_file = f'{os.path.splitext(input)[0]}.xlsx'
-    wb = save_to_xlsx(filename=excel_file, sheets=[variants, extended, clinical])
+    input_file_name = os.path.splitext(input_file)[0]
+    excel_file = f'{input_file_name}.xlsx'
+    wb = save_to_xlsx(filename=excel_file, 
+                      sheets=[variants,
+                              extended,
+                              clinical])
 
     highlight_Clinvar_Significance(
         wb=wb,
@@ -157,6 +164,7 @@ def process_file(input: str):
     for ws in wb.worksheets:
         autofit_columns(ws)
         ws.auto_filter.ref = ws.dimensions
+
     wb.save(excel_file)
 
 
