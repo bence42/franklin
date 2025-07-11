@@ -17,7 +17,7 @@ class Sheet():
         self.data = data
 
     def filter(self, condition) -> 'Sheet':
-        """ e.g. sheet.filter(lambda df: df["Variant_Frequency"] > 0.35) """
+        """ e.g. sheet.filter(lambda df: df["Variant_Frequency"] >= 0.35) """
         self.data = self.data[condition(self.data)]
         return self
 
@@ -134,7 +134,7 @@ def process_file(input_file: str):
     insert_franklin_column(variants.data)
 
     extended = Sheet('extended', variants.data.copy())
-    extended.filter(lambda df: df['Variant_Frequency'] > 0.35)
+    extended.filter(lambda df: df['Variant_Frequency'] >= 0.35)
     extended.sort('Clinvar_Significance')
 
     clinical = Sheet('klinikai', variants.data.copy())
