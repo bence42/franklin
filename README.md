@@ -100,11 +100,11 @@ This is the **most important sheet for biologists**.
 
 ## 🧪 Summary of Filters
 
-| Sheet      | Frequency Filter           | Gene Filter         | Clinvar Filter              |
-| ---------- | -------------------------- | ------------------- | --------------------------- |
-| `variants` | None                       | None                | None                        |
-| `extended` | `Variant_Frequency > 0.35` | None                | Highlight benign            |
-| `klinikai` | None                       | Only selected genes | Highlight benign/non-benign |
+| Sheet      | Frequency Filter            | Gene Filter         | Clinvar Filter              |
+| ---------- | --------------------------- | ------------------- | --------------------------- |
+| `variants` | None                        | None                | None                        |
+| `extended` | `Variant_Frequency >= 0.35` | None                | Highlight benign            |
+| `klinikai` | None                        | Only selected genes | Highlight benign/non-benign |
 
 ---
 
