@@ -1,6 +1,7 @@
 import pandas as pd
 import argparse
 import os
+import glob
 from typing import List
 from openpyxl import load_workbook
 from openpyxl.formatting.rule import Rule
@@ -177,7 +178,14 @@ def save_to_xlsx(filename: str, sheets: List[Sheet]) -> Workbook:
     return load_workbook(filename)
 
 
-def process_files(files: List[str]):
+def process_files(paths: List[str]):
+    files = []
+    for path in paths:
+        if os.path.isdir(path):
+            files.extend(glob.glob(f'{path}/*.txt'))
+        else:
+            files.append(path)
+
     for file in files:
         print(f'processing {file}')
         if not os.path.exists(file):
@@ -193,7 +201,7 @@ def main():
                         '--inputs',
                         nargs='+',
                         required=True,
-                        help='input file(s), space spearated')
+                        help='input file(s) or folder(s), space spearated')
 
     args = parser.parse_args()
 

@@ -14,7 +14,7 @@ Biologists use this tool to focus on **clinically relevant (non-benign) mutation
 
 ## 🗂 Input File Format
 
-- **Format:** Tab-separated `.csv` file
+- **Format:** Tab-separated `csv` file with `.txt` extension
 - **Contents:** Each row is a genetic variant. Important columns include:
   - `Gene_ID`
   - `Variant_Frequency`
@@ -113,7 +113,12 @@ This is the **most important sheet for biologists**.
 If run from the command line, use:
 
 ```bash
-franklin.exe -i sample.csv
+franklin.exe -i sample.txt
+```
+
+
+```bash
+franklin.exe -i sample_folder1 sample_folder2 sample.txt
 ```
 
 The tool will generate an Excel file: `sample.xlsx` in the same folder as `sample.csv`.
